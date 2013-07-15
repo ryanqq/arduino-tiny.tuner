@@ -3,10 +3,14 @@
 #include <avr/eeprom.h>
 #include <util/delay.h>
 
-const bool ReportStatus = true;
-
 const uint8_t NO_PIN = (uint8_t)(-1);
 const uint8_t TogglePin = NO_PIN; // 3; // 
+
+#if FLASHEND <= 1023
+  const bool ReportStatus = false;
+#else
+  const bool ReportStatus = true;
+#endif
 
 #if TC_CLOCK_BASE
   static uint8_t * const OSCCAL_ADDRESS = (uint8_t*const)(E2END -  0);
