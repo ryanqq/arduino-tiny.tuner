@@ -1,6 +1,6 @@
 /*==============================================================================
 
-  Copyright 2012 Rowdy Dog Software.
+  Copyright 2012, 2013 Rowdy Dog Software.
 
   This file is part of TinyTuner2.
 
@@ -30,16 +30,61 @@
 #include <avr/io.h>
 
 
-#if ! defined( TC_XTAL2 )
-#error TC_XTAL2 must be defined for the selected processor.  The definition goes in the processor specific header file.  See tc_hardware_mapping_t861.h for an example.
-#endif
+#if defined( TC_XTAL2 )
+
+  #define TINY_TUNER_DEFAULT_PIN  TC_PIN(TC_XTAL2)
+  #define TINY_TUNER_DEFAULT_BIT  TC_DIO_BIT(TC_XTAL2)
+
+#else
+
+  #if TC_VERSION >= 200
+    #error TC_XTAL2 must be defined for the selected processor.  The definition goes in the processor specific header file.  See tc_hardware_mapping_t861.h for an example.
+  #else
+
+    #if defined( __AVR_ATtiny13__ ) || (__AVR_ATtiny13A__)
+      #define TINY_TUNER_DEFAULT_PIN  PINB
+      #define TINY_TUNER_DEFAULT_BIT  4
+    #endif
+
+    #if defined( __AVR_ATtiny25__ ) || defined( __AVR_ATtiny45__ ) || defined( __AVR_ATtiny85__ )
+      #define TINY_TUNER_DEFAULT_PIN  PINB
+      #define TINY_TUNER_DEFAULT_BIT  4
+    #endif
+
+    #if defined( __AVR_ATtiny24__ ) || defined( __AVR_ATtiny44__ ) || defined( __AVR_ATtiny84__ )
+      #define TINY_TUNER_DEFAULT_PIN  PINB
+      #define TINY_TUNER_DEFAULT_BIT  1
+    #endif
+
+    #if defined( __AVR_ATtiny261__ ) || defined( __AVR_ATtiny461__ ) || defined( __AVR_ATtiny861__ )
+      #define TINY_TUNER_DEFAULT_PIN  PINB
+      #define TINY_TUNER_DEFAULT_BIT  5
+    #endif
+
+    #if defined( __AVR_ATtiny2313__ ) || defined( __AVR_ATtiny4313__ )
+      #define TINY_TUNER_DEFAULT_PIN  PINA
+      #define TINY_TUNER_DEFAULT_BIT  1
+    #endif
+
+    #if defined( __AVR_ATmega328P__ ) || defined( __AVR_ATmega328__ ) || defined( __AVR_ATmega168__ )
+      #define TINY_TUNER_DEFAULT_PIN  PINB
+      #define TINY_TUNER_DEFAULT_BIT  7
+    #endif
+
+    #if ! defined( TINY_TUNER_DEFAULT_PIN ) || ! defined( TINY_TUNER_DEFAULT_BIT )
+      #error TINY_TUNER_DEFAULT_PIN and TINY_TUNER_DEFAULT_BIT must be defined for the selected processor.  The definition goes in this header file.  See the section above for examples.
+    #endif
+
+  #endif // TC_VERSION
+
+#endif // TC_XTAL2
 
 #if ! defined( TINY_TUNER_PIN )
-#define TINY_TUNER_PIN  TC_PIN(TC_XTAL2)
+  #define TINY_TUNER_PIN  TINY_TUNER_DEFAULT_PIN
 #endif
 
 #if ! defined( TINY_TUNER_BIT )
-#define TINY_TUNER_BIT  TC_DIO_BIT(TC_XTAL2)
+  #define TINY_TUNER_BIT  TINY_TUNER_DEFAULT_BIT
 #endif
 
 
@@ -66,99 +111,37 @@ typedef struct
 calibration_results_t;
 
 
-// fix: Move into the core...
-
-/* rmv
-#define TC_PROCESSOR_T13                1
-#define TC_PROCESSOR_TX5                2
-#define TC_PROCESSOR_TX4                3
-#define TC_PROCESSOR_TX313              4
-#define TC_PROCESSOR_M328               5
-#define TC_PROCESSOR_TX61               6
-
-#define TC_SUPPORTED_PROCESSOR_COUNT    6
-*/
-
 #if defined( __AVR_ATtiny13__ ) || (__AVR_ATtiny13A__)
-/* rmv
-  #define __AVR_ATtiny13X__
-  #define TC_PROCESSOR TC_PROCESSOR_T13
-  // The ATtiny13 does not have XTAL pins but if it did XTAL2 would be...
-  #define XTAL2_DDR   DDRB
-  #define XTAL2_PORT  PORTB
-  #define XTAL2_PIN   PINB
-  #define XTAL2_BIT   4
-*/
   static const calibration_t calibration =
       { 1, { { 0x00, 0x5A, 0x7F }, { 0x00, 0x00, 0x00 } } };
   #define TINY_TUNER_HAVE_CALIBRATION  (1)
 #endif
 
 #if defined( __AVR_ATtiny25__ ) || defined( __AVR_ATtiny45__ ) || defined( __AVR_ATtiny85__ )
-/* rmv
-  #define __AVR_ATtinyX5__
-  #define TC_PROCESSOR TC_PROCESSOR_TX5
-  #define XTAL2_DDR   DDRB
-  #define XTAL2_PORT  PORTB
-  #define XTAL2_PIN   PINB
-  #define XTAL2_BIT   4
-*/
   static const calibration_t calibration =
       { 2, { { 0x00, 0x68, 0x7F }, { 0x80, 0x90, 0xFF } } };
   #define TINY_TUNER_HAVE_CALIBRATION  (1)
 #endif
 
 #if defined( __AVR_ATtiny24__ ) || defined( __AVR_ATtiny44__ ) || defined( __AVR_ATtiny84__ )
-/* rmv
-  #define __AVR_ATtinyX4__
-  #define TC_PROCESSOR TC_PROCESSOR_TX4
-  #define XTAL2_DDR   DDRB
-  #define XTAL2_PORT  PORTB
-  #define XTAL2_PIN   PINB
-  #define XTAL2_BIT   1
-*/
   static const calibration_t calibration =
       { 2, { { 0x00, 0x74, 0x7F }, { 0x80, 0xA8, 0xFF } } };
   #define TINY_TUNER_HAVE_CALIBRATION  (1)
 #endif
 
 #if defined( __AVR_ATtiny2313__ ) || defined( __AVR_ATtiny4313__ )
-/* rmv
-  #define __AVR_ATtinyX313__
-  #define TC_PROCESSOR TC_PROCESSOR_TX313
-  #define XTAL2_DDR   DDRA
-  #define XTAL2_PORT  PORTA
-  #define XTAL2_PIN   PINA
-  #define XTAL2_BIT   1
-*/
   static const calibration_t calibration =
       { 1, { { 0x00, 0x65, 0x7F }, { 0x00, 0x00, 0x00 } } };
   #define TINY_TUNER_HAVE_CALIBRATION  (1)
 #endif
 
 #if defined( __AVR_ATmega328P__ ) || defined( __AVR_ATmega328__ ) || defined( __AVR_ATmega168__ )
-/* rmv
-  #define __AVR_ATtiny328X__
-  #define TC_PROCESSOR TC_PROCESSOR_M328
-  #define XTAL2_DDR   DDRB
-  #define XTAL2_PORT  PORTB
-  #define XTAL2_PIN   PINB
-  #define XTAL2_BIT   7
-*/
   static const calibration_t calibration =
       { 2, { { 0x00, 0x6E, 0x7F }, { 0x80, 0xB4, 0xFF } } };
   #define TINY_TUNER_HAVE_CALIBRATION  (1)
 #endif
 
-#if 0 // defined( __AVR_ATtiny261__ ) || defined( __AVR_ATtiny461__ ) || defined( __AVR_ATtiny861__ )
-/* rmv
-  #define __AVR_ATtinyX61__
-  #define TC_PROCESSOR TC_PROCESSOR_TX61
-  #define XTAL2_DDR   DDRB
-  #define XTAL2_PORT  PORTB
-  #define XTAL2_PIN   PINB
-  #define XTAL2_BIT   5
-*/
+#if defined( __AVR_ATtiny261__ ) || defined( __AVR_ATtiny461__ ) || defined( __AVR_ATtiny861__ )
   static const calibration_t calibration =
       { 2, { { 0x00, 0x65, 0x7F }, { 0x80, 0x85, 0xFF } } };
   #define TINY_TUNER_HAVE_CALIBRATION  (1)
@@ -170,18 +153,6 @@ calibration_results_t;
       { 2, { { 0x00, 0x40, 0x7F }, { 0x80, 0xC0, 0xFF } } };
 #endif
 
-/* rmv
-static const calibration_t calibration[TC_SUPPORTED_PROCESSOR_COUNT+1] =
-{
-  { 0, { { 0x00, 0x00, 0x00 }, { 0x00, 0x00, 0x00 } } },  // ?
-  { 1, { { 0x00, 0x5A, 0x7F }, { 0x00, 0x00, 0x00 } } },  // T13
-  { 2, { { 0x00, 0x68, 0x7F }, { 0x80, 0x90, 0xFF } } },  // TX5
-  { 2, { { 0x00, 0x74, 0x7F }, { 0x80, 0xA8, 0xFF } } },  // TX4
-  { 1, { { 0x00, 0x65, 0x7F }, { 0x00, 0x00, 0x00 } } },  // TX313
-  { 2, { { 0x00, 0x6E, 0x7F }, { 0x80, 0xB4, 0xFF } } },  // M328
-  { 2, { { 0x00, 0x65, 0x7F }, { 0x80, 0x85, 0xFF } } }   // TX61
-};
-*/
 
 class TinyTuner2Class
 {
@@ -191,29 +162,34 @@ public:
     // 16 ms pulse, 1 us cycle, 5 cycles per loop, 5 us per loop
     // 16 ms / 5 us = (16/1000)/(5/1000000) = 3200
     static const uint16_t CALIBRATION_GOAL  = 3200;
+    #define TC_CLOCK_DIVIDED_BY_8  1
     
   #elif F_CPU == 1200000L
     // 16 ms pulse, 1/1.2 us cycle, 5 cycles per loop, 5/1.2 us per loop
     // 16 ms / (5/1.2) us = (16/1000)/((5/1.2)/1000000) = 3840
     static const uint16_t CALIBRATION_GOAL  = 3840;
+    #define TC_CLOCK_DIVIDED_BY_8  1
     
   #elif  F_CPU == 8000000L
     // 16 ms pulse, 1/8 us cycle, 5 cycles per loop, 5/8 us per loop
     // 16 ms / (5/8) us = (16/1000)/((5/8)/1000000) = 25600
     #define TOP_FIXER 8
     static const uint16_t CALIBRATION_GOAL  = 3200;
+    #define TC_CLOCK_BASE  1
     
   #elif F_CPU == 9600000L
     // 16 ms pulse, 1/9.6 us cycle, 5 cycles per loop, 5/9.6 us per loop
     // 16 ms / (5/9.6) us = (16/1000)/((5/9.6)/1000000) = 30720
     #define TOP_FIXER 8
     static const uint16_t CALIBRATION_GOAL  = 3840;
+    #define TC_CLOCK_BASE  1
     
   #elif  F_CPU == 16000000L
     // 16 ms pulse, 1/16 us cycle, 5 cycles per loop, 5/16 us per loop
     // 16 ms / (5/16) us = (16/1000)/((5/16)/1000000) = 51200
     #define TOP_FIXER 16
     static const uint16_t CALIBRATION_GOAL  = 3200;
+    #define TC_CLOCK_MULTIPLIED_BY_2  1
     
   #endif
 
